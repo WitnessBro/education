@@ -8,6 +8,8 @@ import (
 
 type Config struct {
 	DatabaseURL string `yaml:"database_url"`
+	Port        string `yaml:"port"`
+	LogLevel    string `yaml:"log_level"`
 }
 
 func LoadConfig(path string) (*Config, error) {

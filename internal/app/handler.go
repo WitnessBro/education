@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/WitnessBro/education/internal/app/logger"
 	"github.com/gorilla/mux"
 )
 
@@ -16,12 +17,16 @@ type User struct {
 	Email string `json:"email"`
 }
 
+// TODO: Not working
+var logger1 = logger.NewLogger()
+
 // get all users
 func GetUsers(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		rows, err := db.Query("SELECT * FROM users")
+		// TODO: Not working
 		if err != nil {
-			log.Fatal(err)
+			logger1.Error("No users")
 		}
 		defer rows.Close()
 
