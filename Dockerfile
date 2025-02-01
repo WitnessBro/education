@@ -1,4 +1,4 @@
-FROM golang:1.19.0
+FROM golang:latest
 
 WORKDIR /app
 
@@ -6,7 +6,7 @@ COPY . .
 
 RUN go get -d -v ./...
 
-RUN go build -o github.com/WitnessBro/education .
+RUN go build -o github.com/WitnessBro/education ./cmd/task_manager
 
 EXPOSE 8000
 
