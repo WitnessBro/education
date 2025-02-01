@@ -3,11 +3,11 @@ package app
 import (
 	"database/sql"
 	"encoding/json"
+	"log/slog"
 
 	"log"
 	"net/http"
 
-	"github.com/WitnessBro/education/internal/app/logger"
 	"github.com/gorilla/mux"
 )
 
@@ -18,15 +18,18 @@ type User struct {
 }
 
 // TODO: Not working
-var logger1 = logger.NewLogger()
+//var logger1 = logger.NewLogger()
 
 // get all users
+// TODO
+
 func GetUsers(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		//repository.GetUsers()
 		rows, err := db.Query("SELECT * FROM users")
 		// TODO: Not working
 		if err != nil {
-			logger1.Error("No users")
+			slog.Error("No users")
 		}
 		defer rows.Close()
 
@@ -55,10 +58,9 @@ func GetUser(db *sql.DB) http.HandlerFunc {
 		var u User
 		err := db.QueryRow("SELECT * FROM users WHERE id = $1", id).Scan(&u.ID, &u.Name, &u.Email)
 		if err != nil {
-			w.WriteHeader(http.StatusNotFound)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-
 		json.NewEncoder(w).Encode(u)
 	}
 }

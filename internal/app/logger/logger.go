@@ -7,8 +7,8 @@ import (
 	"github.com/WitnessBro/education/internal/config"
 )
 
-func NewLogger() *slog.Logger {
-	cfg, err := config.LoadConfig("internal/config/config.yaml")
+func NewLogger() {
+	cfg, err := config.LoadConfig("configs/config.yaml")
 	if err != nil {
 		slog.Error("failed to load config", "error", err)
 		os.Exit(1)
@@ -32,6 +32,4 @@ func NewLogger() *slog.Logger {
 	}))
 
 	slog.SetDefault(logger)
-
-	return logger
 }
