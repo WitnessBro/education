@@ -4,19 +4,23 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	openapiTask "github.com/WitnessBro/education/internal/app/handlers/http"
+	openapiUser "github.com/WitnessBro/education/internal/app/handlers/user"
+	"github.com/WitnessBro/education/internal/service"
+	"github.com/WitnessBro/education/internal/storage"
+	"github.com/go-chi/chi/v5"
 )
 
-func NewRouter(db *sql.DB) *mux.Router {
-	router := mux.NewRouter()
+func NewRouter(db *sql.DB) *chi.Mux {
 
-	router.HandleFunc("/users", GetUsers(db)).Methods("GET")
-	router.HandleFunc("/users/{id}", GetUser(db)).Methods("GET")
-	router.HandleFunc("/users", CreateUser(db)).Methods("POST")
-	router.HandleFunc("/users/{id}", UpdateUser(db)).Methods("PUT")
-	router.HandleFunc("/users/{id}", DeleteUser(db)).Methods("DELETE")
+	userRepo := storage.NewUserRepository(db)
 
-	return router
+	r := chi.NewRouter()
+	task_manager_service := &service.TaskManagerService{}
+	user_service := service.NewUserService(userRepo)
+	openapiTask.HandlerFromMux(task_manager_service, r)
+	openapiUser.HandlerFromMux(user_service, r)
+	return r
 }
 
 func JsonContentTypeMiddleware(next http.Handler) http.Handler {
