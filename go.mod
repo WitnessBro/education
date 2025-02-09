@@ -5,7 +5,6 @@ go 1.23
 require (
 	github.com/getkin/kin-openapi v0.129.0
 	github.com/go-chi/chi/v5 v5.2.0
-	github.com/gorilla/mux v1.8.1
 	github.com/lib/pq v1.10.9
 	github.com/oapi-codegen/runtime v1.1.1
 	gopkg.in/yaml.v2 v2.4.0

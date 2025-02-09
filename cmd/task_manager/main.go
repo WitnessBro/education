@@ -18,14 +18,17 @@ func main() {
 	}
 	defer db.Close()
 
-	//create the table if it doesn't exist
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, name TEXT, email TEXT)")
+	//TODO Graceful shutdown
+	// Connect - интерфейс с методами GetConnect и Close
+
+	//TODO Migration
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, name TEXT, email TEXT, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), status TEXT)")
 
 	if err != nil {
 		slog.Error("Database already exist")
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS tasks (id SERIAL PRIMARY KEY, name TEXT, email TEXT)")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS tasks (id SERIAL PRIMARY KEY, description TEXT, status TEXT, title TEXT)")
 
 	if err != nil {
 		slog.Error("Database already exist")

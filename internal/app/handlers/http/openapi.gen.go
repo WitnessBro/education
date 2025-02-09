@@ -16,6 +16,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-chi/chi/v5"
 	"github.com/oapi-codegen/runtime"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 // Defines values for TaskStatus.
@@ -36,11 +37,24 @@ type Task struct {
 // TaskStatus defines model for Task.Status.
 type TaskStatus string
 
+// User defines model for User.
+type User struct {
+	Email openapi_types.Email `json:"email"`
+	Id    *int64              `json:"id,omitempty"`
+	Name  string              `json:"name"`
+}
+
 // CreateTaskJSONRequestBody defines body for CreateTask for application/json ContentType.
 type CreateTaskJSONRequestBody = Task
 
 // UpdateTaskJSONRequestBody defines body for UpdateTask for application/json ContentType.
 type UpdateTaskJSONRequestBody = Task
+
+// PostUsersJSONRequestBody defines body for PostUsers for application/json ContentType.
+type PostUsersJSONRequestBody = User
+
+// PutUsersIdJSONRequestBody defines body for PutUsersId for application/json ContentType.
+type PutUsersIdJSONRequestBody = User
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -59,6 +73,21 @@ type ServerInterface interface {
 	// Update a task by ID
 	// (PUT /tasks/{taskId})
 	UpdateTask(w http.ResponseWriter, r *http.Request, taskId string)
+	// Получить список всех пользователей
+	// (GET /users)
+	GetUsers(w http.ResponseWriter, r *http.Request)
+	// Создать нового пользователя
+	// (POST /users)
+	PostUsers(w http.ResponseWriter, r *http.Request)
+	// Удалить пользователя по ID
+	// (DELETE /users/{id})
+	DeleteUsersId(w http.ResponseWriter, r *http.Request, id int)
+	// Получить пользователя по ID
+	// (GET /users/{id})
+	GetUsersId(w http.ResponseWriter, r *http.Request, id int)
+	// Обновить пользователя по ID
+	// (PUT /users/{id})
+	PutUsersId(w http.ResponseWriter, r *http.Request, id int)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -92,6 +121,36 @@ func (_ Unimplemented) GetTaskById(w http.ResponseWriter, r *http.Request, taskI
 // Update a task by ID
 // (PUT /tasks/{taskId})
 func (_ Unimplemented) UpdateTask(w http.ResponseWriter, r *http.Request, taskId string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Получить список всех пользователей
+// (GET /users)
+func (_ Unimplemented) GetUsers(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Создать нового пользователя
+// (POST /users)
+func (_ Unimplemented) PostUsers(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Удалить пользователя по ID
+// (DELETE /users/{id})
+func (_ Unimplemented) DeleteUsersId(w http.ResponseWriter, r *http.Request, id int) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Получить пользователя по ID
+// (GET /users/{id})
+func (_ Unimplemented) GetUsersId(w http.ResponseWriter, r *http.Request, id int) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Обновить пользователя по ID
+// (PUT /users/{id})
+func (_ Unimplemented) PutUsersId(w http.ResponseWriter, r *http.Request, id int) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -203,6 +262,114 @@ func (siw *ServerInterfaceWrapper) UpdateTask(w http.ResponseWriter, r *http.Req
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.UpdateTask(w, r, taskId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetUsers operation middleware
+func (siw *ServerInterfaceWrapper) GetUsers(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetUsers(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PostUsers operation middleware
+func (siw *ServerInterfaceWrapper) PostUsers(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostUsers(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// DeleteUsersId operation middleware
+func (siw *ServerInterfaceWrapper) DeleteUsersId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteUsersId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetUsersId operation middleware
+func (siw *ServerInterfaceWrapper) GetUsersId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetUsersId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PutUsersId operation middleware
+func (siw *ServerInterfaceWrapper) PutUsersId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutUsersId(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -340,6 +507,21 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	r.Group(func(r chi.Router) {
 		r.Put(options.BaseURL+"/tasks/{taskId}", wrapper.UpdateTask)
 	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/users", wrapper.GetUsers)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/users", wrapper.PostUsers)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/users/{id}", wrapper.DeleteUsersId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/users/{id}", wrapper.GetUsersId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/users/{id}", wrapper.PutUsersId)
+	})
 
 	return r
 }
@@ -347,17 +529,23 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
