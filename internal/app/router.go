@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	openapiTask "github.com/WitnessBro/education/internal/app/handlers/http"
-	openapiUser "github.com/WitnessBro/education/internal/app/handlers/user"
 	"github.com/WitnessBro/education/internal/service"
 	"github.com/WitnessBro/education/internal/storage"
 	"github.com/go-chi/chi/v5"
@@ -13,13 +12,12 @@ import (
 
 func NewRouter(db *sql.DB) *chi.Mux {
 
-	userRepo := storage.NewUserRepository(db)
+	userRepo := storage.NewUserStorage(db)
+	taskRepo := storage.NewTaskStorage(db)
 
 	r := chi.NewRouter()
-	task_manager_service := &service.TaskManagerService{}
-	user_service := service.NewUserService(userRepo)
+	task_manager_service := service.NewTaskManagerService(userRepo, taskRepo)
 	openapiTask.HandlerFromMux(task_manager_service, r)
-	openapiUser.HandlerFromMux(user_service, r)
 	return r
 }
 

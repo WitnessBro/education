@@ -13,3 +13,9 @@ func Connect(databaseURL string) (*sql.DB, error) {
 	}
 	return db, nil
 }
+
+//TODO InitConnection
+
+func InitConnection() {
+
+}
