@@ -1,8 +1,13 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 
 	"github.com/WitnessBro/education/internal/app"
 	"github.com/WitnessBro/education/internal/config"
@@ -12,19 +17,32 @@ import (
 
 func main() {
 	config, _ := config.LoadConfig("configs/config.yaml")
-	// Настраиваем логгер с JSON-форматом
 	db, err := db.Connect(config.DatabaseURL)
 	if err != nil {
 		slog.Error("Can't connect")
 	}
 	defer db.Close()
 
-	//TODO Graceful shutdown
-	// Connect - интерфейс с методами GetConnect и Close
+	_, cancel := context.WithCancel(context.Background())
+
+	var wg sync.WaitGroup
+
+	wg.Add(1)
 
 	migrations.DoMigrations(db)
 	router := app.NewRouter(db)
 
-	//log.Log(context.Background(), slog.LevelDebug, "Server started on "+config.Port)
-	http.ListenAndServe(config.Port, app.JsonContentTypeMiddleware(router))
+	go http.ListenAndServe(config.Port, app.JsonContentTypeMiddleware(router))
+
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
+
+	<-signalCh
+	slog.Info("\nGracefully shutting down service...")
+
+	cancel()
+	wg.Wait()
+
+	slog.Info("Shutdown complete.")
+	// Connect - интерфейс с методами GetConnect и Close
 }
