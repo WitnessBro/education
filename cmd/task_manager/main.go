@@ -6,6 +6,7 @@ import (
 
 	"github.com/WitnessBro/education/internal/app"
 	"github.com/WitnessBro/education/internal/config"
+	"github.com/WitnessBro/education/internal/migrations"
 	"github.com/WitnessBro/education/pkg/db"
 )
 
@@ -21,19 +22,7 @@ func main() {
 	//TODO Graceful shutdown
 	// Connect - интерфейс с методами GetConnect и Close
 
-	//TODO Migration
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, name TEXT, email TEXT, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), status TEXT)")
-
-	if err != nil {
-		slog.Error("Database already exist")
-	}
-
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS tasks (id SERIAL PRIMARY KEY, description TEXT, status TEXT, title TEXT)")
-
-	if err != nil {
-		slog.Error("Database already exist")
-	}
-
+	migrations.DoMigrations(db)
 	router := app.NewRouter(db)
 
 	//log.Log(context.Background(), slog.LevelDebug, "Server started on "+config.Port)
