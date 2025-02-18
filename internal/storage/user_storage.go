@@ -11,6 +11,8 @@ type UserStorage struct {
 }
 
 // TODO вместе с InitConnection поменять тут
+
+// TODO подумать про ауторизэйшн токен для получения всех тасок
 func NewUserStorage(db *sql.DB) *UserStorage {
 	return &UserStorage{db: db}
 }

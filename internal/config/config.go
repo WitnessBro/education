@@ -7,9 +7,10 @@ import (
 )
 
 type Config struct {
-	DatabaseURL string `yaml:"database_url"`
-	Port        string `yaml:"port"`
-	LogLevel    string `yaml:"log_level"`
+	DatabaseURL  string `yaml:"database_url"`
+	Port         string `yaml:"port"`
+	LogLevel     string `yaml:"log_level"`
+	MigrationDir string `yaml:"migration_dir"`
 }
 
 func LoadConfig(path string) (*Config, error) {

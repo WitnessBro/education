@@ -39,9 +39,10 @@ type TaskStatus string
 
 // User defines model for User.
 type User struct {
-	Email openapi_types.Email `json:"email"`
-	Id    *int64              `json:"id,omitempty"`
-	Name  string              `json:"name"`
+	Email  openapi_types.Email `json:"email"`
+	Id     int64               `json:"id"`
+	Name   string              `json:"name"`
+	Status string              `json:"status"`
 }
 
 // CreateTaskJSONRequestBody defines body for CreateTask for application/json ContentType.
@@ -58,9 +59,6 @@ type PutUsersIdJSONRequestBody = User
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Get all tasks
-	// (GET /tasks)
-	GetTasks(w http.ResponseWriter, r *http.Request)
 	// Create a new task
 	// (POST /tasks)
 	CreateTask(w http.ResponseWriter, r *http.Request)
@@ -79,6 +77,9 @@ type ServerInterface interface {
 	// Создать нового пользователя
 	// (POST /users)
 	PostUsers(w http.ResponseWriter, r *http.Request)
+	// Получить все таски для юзера
+	// (GET /users/getTasks/{id})
+	GetUsersGetTasksId(w http.ResponseWriter, r *http.Request, id int)
 	// Удалить пользователя по ID
 	// (DELETE /users/{id})
 	DeleteUsersId(w http.ResponseWriter, r *http.Request, id int)
@@ -93,12 +94,6 @@ type ServerInterface interface {
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
 
 type Unimplemented struct{}
-
-// Get all tasks
-// (GET /tasks)
-func (_ Unimplemented) GetTasks(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
 
 // Create a new task
 // (POST /tasks)
@@ -136,6 +131,12 @@ func (_ Unimplemented) PostUsers(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// Получить все таски для юзера
+// (GET /users/getTasks/{id})
+func (_ Unimplemented) GetUsersGetTasksId(w http.ResponseWriter, r *http.Request, id int) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // Удалить пользователя по ID
 // (DELETE /users/{id})
 func (_ Unimplemented) DeleteUsersId(w http.ResponseWriter, r *http.Request, id int) {
@@ -162,21 +163,6 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
-
-// GetTasks operation middleware
-func (siw *ServerInterfaceWrapper) GetTasks(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetTasks(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r.WithContext(ctx))
-}
 
 // CreateTask operation middleware
 func (siw *ServerInterfaceWrapper) CreateTask(w http.ResponseWriter, r *http.Request) {
@@ -292,6 +278,32 @@ func (siw *ServerInterfaceWrapper) PostUsers(w http.ResponseWriter, r *http.Requ
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostUsers(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetUsersGetTasksId operation middleware
+func (siw *ServerInterfaceWrapper) GetUsersGetTasksId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetUsersGetTasksId(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -493,9 +505,6 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/tasks", wrapper.GetTasks)
-	})
-	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/tasks", wrapper.CreateTask)
 	})
 	r.Group(func(r chi.Router) {
@@ -514,6 +523,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/users", wrapper.PostUsers)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/users/getTasks/{id}", wrapper.GetUsersGetTasksId)
+	})
+	r.Group(func(r chi.Router) {
 		r.Delete(options.BaseURL+"/users/{id}", wrapper.DeleteUsersId)
 	})
 	r.Group(func(r chi.Router) {
@@ -529,23 +541,24 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"aGe/828AAAD//+RwV+qyEAAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -2,9 +2,11 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS tasks (
 	id SERIAL PRIMARY KEY, 
-	description TEXT, 
-	status TEXT,
-	title TEXT
+	task_description TEXT, 
+	task_status TEXT,
+	title TEXT,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	user_id BIGINT
 );
 -- +goose StatementEnd
 
