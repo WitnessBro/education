@@ -18,7 +18,7 @@ func NewUserStorage(db *sql.DB) *UserStorage {
 }
 
 func (r *UserStorage) GetUsers() ([]models.User, error) {
-	rows, err := r.db.Query("SELECT * FROM users")
+	rows, err := r.db.Query("SELECT id, name, email,created_at, status FROM users")
 	if err != nil {
 		return nil, err
 	}

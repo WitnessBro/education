@@ -15,9 +15,6 @@ func NewTaskStorage(db *sql.DB) *TaskStorage {
 	return &TaskStorage{db: db}
 }
 
-// TODO Убрать SELECT *
-
-// TODO GetTaskByUserId
 // Index on UserId
 
 // TODO доделать

@@ -122,5 +122,4 @@ func (t *TaskManagerService) GetTaskById(w http.ResponseWriter, r *http.Request,
 		return
 	}
 	json.NewEncoder(w).Encode(tasks)
-
 }

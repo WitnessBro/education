@@ -11,7 +11,6 @@ import (
 )
 
 func NewRouter(db *sql.DB) *chi.Mux {
-
 	userRepo := storage.NewUserStorage(db)
 	taskRepo := storage.NewTaskStorage(db)
 
