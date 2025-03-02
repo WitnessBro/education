@@ -14,5 +14,8 @@ migrate-up:
 migrate-down:
 	goose -dir $(MIGRATIONS_DIR) postgres "$(DB_URL)" down
 
+run-accepted-tests:
+	go test -v ./test
+
 generate:
 	oapi-codegen -package=http -generate=chi-server,types,spec api/task_manager_api.yaml > internal/app/handlers/http/openapi.gen.go

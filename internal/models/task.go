@@ -1,11 +1,14 @@
 package models
 
-//TODO USer_id, created_at, notification_rules, deadline (time)?,
+import "time"
+
+//TODO USer_id, created_at, notification_rules, deadline (time)?, TAGS
 type Task struct {
-	Description *string    `json:"description,omitempty"`
-	Id          string     `json:"id"`
-	Status      TaskStatus `json:"status"`
-	Title       string     `json:"title"`
+	TaskDescription string     `json:"task_description,omitempty"`
+	TaskStatus      TaskStatus `json:"task_status"`
+	Title           string     `json:"title"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UserId          int        `json:"user_id"`
 }
 
 const (
@@ -14,5 +17,4 @@ const (
 	Pending    TaskStatus = "pending"
 )
 
-// TaskStatus defines model for Task.Status.
 type TaskStatus string

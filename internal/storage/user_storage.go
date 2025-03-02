@@ -11,12 +11,14 @@ type UserStorage struct {
 }
 
 // TODO вместе с InitConnection поменять тут
+
+// TODO подумать про ауторизэйшн токен для получения всех тасок
 func NewUserStorage(db *sql.DB) *UserStorage {
 	return &UserStorage{db: db}
 }
 
 func (r *UserStorage) GetUsers() ([]models.User, error) {
-	rows, err := r.db.Query("SELECT * FROM users")
+	rows, err := r.db.Query("SELECT id, name, email,created_at, status FROM users")
 	if err != nil {
 		return nil, err
 	}

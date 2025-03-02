@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 
 	"github.com/WitnessBro/education/internal/app"
@@ -16,18 +15,18 @@ import (
 )
 
 func main() {
+	//TODO брать конфиг из аргументов cmd, если нет конфига, то не запуститься
 	config, _ := config.LoadConfig("configs/config.yaml")
 	db, err := db.Connect(config.DatabaseURL)
+	//ndb := NewDataBase
+	//ndb.GetConnect()
 	if err != nil {
 		slog.Error("Can't connect")
 	}
 	defer db.Close()
-
+	//defer ndb.Close()
+	//conn := NewStorage
 	_, cancel := context.WithCancel(context.Background())
-
-	var wg sync.WaitGroup
-
-	wg.Add(1)
 
 	migrations.DoMigrations(db)
 	router := app.NewRouter(db)
@@ -38,11 +37,13 @@ func main() {
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
 
 	<-signalCh
+
 	slog.Info("\nGracefully shutting down service...")
 
+	//ndb.Close()
+
 	cancel()
-	wg.Wait()
 
 	slog.Info("Shutdown complete.")
-	// Connect - интерфейс с методами GetConnect и Close
+	// TODO Connect - интерфейс с методами GetConnect и Close
 }
